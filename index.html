@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>macOS Updater Suite — Download • Update • Install • EFI</title>
+  <meta name="description" content="Suite completa para gerenciar, baixar, atualizar e instalar o macOS. 6 ferramentas em 1 app. macOS Ventura 13+ e Tahoe 26+." />
+  <meta property="og:title" content="macOS Updater Suite" />
+  <meta property="og:description" content="6 ferramentas em 1 app para macOS. Download, Update, Media Creator, EFI, System Info e mais." />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --blue: #58a6ff;
+      --green: #00ff41;
+      --green2: #3fb950;
+      --yellow: #d29922;
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --red: #ff5f57;
+      --amber: #ffbd2e;
+      --dot-green: #28c840;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, "SF Pro Display", BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s, backdrop-filter 0.3s, border-bottom 0.3s;
+    }
+
+    nav.scrolled {
+      background: rgba(13,17,23,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-logo span { color: var(--green); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .btn-nav {
+      background: var(--blue);
+      color: #fff !important;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s, transform 0.2s !important;
+    }
+
+    .btn-nav:hover { background: #4090e0 !important; transform: scale(1.04); }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 64px; left: 0; right: 0;
+      background: rgba(13,17,23,0.97);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      z-index: 999;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { color: var(--text); text-decoration: none; font-size: 16px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+
+    /* ===== HERO ===== */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      overflow: hidden;
+    }
+
+    #matrix-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; z-index: 2; max-width: 860px; }
+
+    .hero-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 13px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge.green { border-color: var(--green2); color: var(--green2); }
+    .badge.blue { border-color: var(--blue); color: var(--blue); }
+
+    h1 {
+      font-size: clamp(40px, 7vw, 72px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #e6edf3 0%, #58a6ff 50%, #00ff41 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(17px, 2.5vw, 22px);
+      color: var(--text2);
+      margin-bottom: 36px;
+      max-width: 620px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-sub strong { color: var(--text); }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 60px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a6fe6, #58a6ff);
+      color: #fff;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 17px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(88,166,255,0.35);
+    }
+
+    .btn-primary:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 32px rgba(88,166,255,0.5); }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      padding: 16px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 17px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--border);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-secondary:hover { background: #2d333b; transform: translateY(-2px); }
+
+    /* macOS window frame hero image */
+    .hero-window {
+      max-width: 780px;
+      width: 100%;
+      margin: 0 auto;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+    }
+
+    .window-titlebar {
+      background: #2d2d2d;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red { background: var(--red); }
+    .dot-yellow { background: var(--amber); }
+    .dot-green { background: var(--dot-green); }
+    .window-title { color: #8b949e; font-size: 13px; margin-left: 8px; }
+
+    .hero-window img { width: 100%; display: block; }
+
+    /* ===== SECTIONS COMMON ===== */
+    section { padding: 96px 24px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--green2);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 18px;
+      color: var(--text2);
+      max-width: 580px;
+      margin-bottom: 56px;
+    }
+
+    /* ===== STATS ===== */
+    #stats {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 24px;
+    }
+
+    .stats-grid {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item { text-align: center; }
+
+    .stat-number {
+      font-size: 56px;
+      font-weight: 900;
+      letter-spacing: -3px;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      color: var(--text2);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    /* ===== FEATURES ===== */
+    #features { background: var(--bg); }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: rgba(22,27,34,0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      cursor: default;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      border-color: var(--blue);
+    }
+
+    .feature-icon {
+      font-size: 36px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .feature-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .feature-desc {
+      font-size: 15px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    /* ===== SCREENSHOTS ===== */
+    #screenshots { background: var(--surface); }
+
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .screenshot-item {
+      cursor: pointer;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+      border: 1px solid var(--border);
+    }
+
+    .screenshot-item:hover {
+      transform: scale(1.03);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      border-color: var(--blue);
+    }
+
+    .screenshot-item .window-titlebar { padding: 10px 14px; }
+    .screenshot-item img { width: 100%; display: block; }
+
+    .screenshot-label {
+      background: var(--surface2);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .theme-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+
+    .tag-matrix { background: rgba(0,255,65,0.15); color: var(--green); border: 1px solid rgba(0,255,65,0.3); }
+    .tag-dark { background: rgba(88,166,255,0.1); color: var(--blue); border: 1px solid rgba(88,166,255,0.25); }
+    .tag-light { background: rgba(240,230,140,0.1); color: #f0e68c; border: 1px solid rgba(240,230,140,0.25); }
+
+    /* screenshot 7 centered */
+    .screenshots-grid .screenshot-item:nth-child(7) {
+      grid-column: 2;
+    }
+
+    /* ===== LIGHTBOX ===== */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #lightbox.open { display: flex; }
+
+    #lightbox img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: 12px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+    }
+
+    #lightbox-close {
+      position: absolute;
+      top: 20px; right: 24px;
+      font-size: 32px;
+      color: #fff;
+      cursor: pointer;
+      background: rgba(255,255,255,0.1);
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    #lightbox-close:hover { background: rgba(255,255,255,0.25); }
+
+    /* ===== TEMAS ===== */
+    #temas { background: var(--bg); }
+
+    .temas-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .tema-card {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .tema-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    }
+
+    .tema-card img { width: 100%; display: block; }
+
+    .tema-info {
+      background: var(--surface2);
+      padding: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .tema-name {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .tema-desc {
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    /* ===== ACTIVATION ===== */
+    #activation { background: var(--surface); }
+
+    .activation-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .steps { display: flex; flex-direction: column; gap: 28px; }
+
+    .step {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      min-width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), #1a6fe6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(88,166,255,0.35);
+    }
+
+    .step-content h4 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .step-content p { font-size: 14px; color: var(--text2); }
+
+    .activation-window {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    }
+
+    .activation-window img { width: 100%; display: block; }
+
+    /* ===== PRICING ===== */
+    #pricing { background: var(--bg); }
+
+    .pricing-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px 52px;
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pricing-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+    }
+
+    .pricing-badge {
+      display: inline-block;
+      background: rgba(0,255,65,0.12);
+      color: var(--green2);
+      border: 1px solid rgba(0,255,65,0.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .pricing-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+
+    .price-main {
+      font-size: 72px;
+      font-weight: 900;
+      letter-spacing: -4px;
+      line-height: 1;
+      margin: 20px 0 4px;
+      background: linear-gradient(135deg, var(--text), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .price-currency { font-size: 36px; vertical-align: super; letter-spacing: 0; }
+    .price-sub { color: var(--text2); font-size: 15px; margin-bottom: 8px; }
+    .price-brl { color: var(--text2); font-size: 14px; margin-bottom: 32px; background: var(--surface2); border-radius: 8px; padding: 8px 16px; display: inline-block; border: 1px solid var(--border); }
+
+    .features-list {
+      list-style: none;
+      text-align: left;
+      margin: 28px 0 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .features-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+    }
+
+    .features-list li i { color: var(--green2); width: 16px; }
+
+    .pricing-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-paypal-usd {
+      background: linear-gradient(135deg, #1a6fe6, #58a6ff);
+      color: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 17px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(88,166,255,0.3);
+    }
+
+    .btn-paypal-usd:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(88,166,255,0.5); }
+
+    .btn-paypal-brl {
+      background: var(--surface2);
+      color: var(--text);
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid var(--border);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .btn-paypal-brl:hover { background: #2d333b; transform: translateY(-1px); }
+
+    .pricing-note {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    /* ===== FAQ ===== */
+    #faq { background: var(--surface); }
+
+    .faq-list { display: flex; flex-direction: column; gap: 12px; max-width: 760px; }
+
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface2);
+    }
+
+    .faq-question {
+      padding: 20px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .faq-question:hover { background: rgba(88,166,255,0.06); }
+
+    .faq-question i {
+      color: var(--text2);
+      transition: transform 0.3s;
+      font-size: 14px;
+    }
+
+    .faq-item.open .faq-question i { transform: rotate(180deg); }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+
+    .faq-item.open .faq-answer { max-height: 200px; }
+
+    .faq-answer p {
+      padding: 0 24px 20px;
+      color: var(--text2);
+      font-size: 15px;
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 48px 24px;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 32px;
+      align-items: flex-start;
+    }
+
+    .footer-brand h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .footer-brand h3 span { color: var(--green); }
+    .footer-brand p { font-size: 14px; color: var(--text2); max-width: 320px; line-height: 1.6; }
+
+    .footer-links h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); margin-bottom: 12px; }
+    .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-links a { color: var(--text2); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-contact h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); margin-bottom: 12px; }
+    .footer-contact a { color: var(--blue); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .footer-contact a:hover { text-decoration: underline; }
+
+    .footer-bottom {
+      max-width: 1100px;
+      margin: 32px auto 0;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-bottom p { font-size: 13px; color: var(--text2); }
+    .footer-bottom a { color: var(--text2); text-decoration: none; }
+    .footer-bottom a:hover { color: var(--text); }
+
+    /* ===== FADE IN ANIMATION ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* stagger delay for children */
+    .fade-in:nth-child(1) { transition-delay: 0.05s; }
+    .fade-in:nth-child(2) { transition-delay: 0.1s; }
+    .fade-in:nth-child(3) { transition-delay: 0.15s; }
+    .fade-in:nth-child(4) { transition-delay: 0.2s; }
+    .fade-in:nth-child(5) { transition-delay: 0.25s; }
+    .fade-in:nth-child(6) { transition-delay: 0.3s; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .screenshots-grid { grid-template-columns: repeat(2, 1fr); }
+      .screenshots-grid .screenshot-item:nth-child(7) { grid-column: auto; }
+      .temas-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+      .activation-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .features-grid { grid-template-columns: 1fr; }
+      .screenshots-grid { grid-template-columns: 1fr; }
+      .pricing-card { padding: 32px 24px; }
+      .stats-grid { gap: 40px; }
+      h1 { letter-spacing: -1px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav id="navbar">
+  <a class="nav-logo" href="#">
+    <i class="fa-brands fa-apple"></i>
+    macOS <span>Updater</span> Suite
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#features">Recursos</a></li>
+    <li><a href="#screenshots">Screenshots</a></li>
+    <li><a href="#temas">Temas</a></li>
+    <li><a href="#pricing">Preço</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li>
+      <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=picelli1974%40outlook.com&amount=20&currency_code=USD&item_name=macOS+Updater+Suite+License"
+         target="_blank" class="btn-nav">
+        🛒 Buy — USD $20
+      </a>
+    </li>
+  </ul>
+
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#features" onclick="closeMobile()">Recursos</a>
+  <a href="#screenshots" onclick="closeMobile()">Screenshots</a>
+  <a href="#temas" onclick="closeMobile()">Temas</a>
+  <a href="#pricing" onclick="closeMobile()">Preço</a>
+  <a href="#faq" onclick="closeMobile()">FAQ</a>
+  <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=picelli1974%40outlook.com&amount=20&currency_code=USD&item_name=macOS+Updater+Suite+License" target="_blank">🛒 Buy — USD $20</a>
+</div>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+  <canvas id="matrix-canvas"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-badge-row">
+      <span class="badge green"><i class="fa-brands fa-apple"></i> macOS Ventura 13+</span>
+      <span class="badge green"><i class="fa-brands fa-apple"></i> macOS Tahoe 26+</span>
+      <span class="badge blue"><i class="fa-solid fa-language"></i> PT + EN</span>
+      <span class="badge"><i class="fa-solid fa-palette"></i> 3 Temas</span>
+      <span class="badge"><i class="fa-solid fa-toolbox"></i> 6 Ferramentas</span>
+    </div>
+
+    <h1>macOS Updater Suite</h1>
+
+    <p class="hero-sub">
+      A suite completa para <strong>baixar, atualizar e instalar</strong> o macOS.<br />
+      Download · Update · Media Creator · EFI · System Info — tudo em <strong>1 só app</strong>.
+    </p>
+
+    <div class="cta-row">
+      <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=picelli1974%40outlook.com&amount=20&currency_code=USD&item_name=macOS+Updater+Suite+License"
+         target="_blank" class="btn-primary">
+        <i class="fa-brands fa-paypal"></i> Comprar Licença — USD $20
+      </a>
+      <a href="https://github.com/maxpicelli/macOS-updater-suite" target="_blank" class="btn-secondary">
+        <i class="fa-brands fa-github"></i> Ver no GitHub
+      </a>
+    </div>
+
+    <!-- Hero screenshot with macOS frame -->
+    <div class="hero-window">
+      <div class="window-titlebar">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+        <span class="window-title">macOS Updater Suite</span>
+      </div>
+      <img src="https://www.genspark.ai/api/files/s/C8UF5SZH"
+           alt="macOS Updater Suite - System Info com Tema Matrix"
+           loading="eager" />
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-number" data-target="6">0</span>
+        <span class="stat-label">Ferramentas Integradas</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" data-target="3">0</span>
+        <span class="stat-label">Temas Visuais</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" data-target="2">0</span>
+        <span class="stat-label">Idiomas (PT + EN)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section id="features">
+  <div class="container">
+    <p class="section-label">Recursos</p>
+    <h2 class="section-title">6 Ferramentas Poderosas em 1 App</h2>
+    <p class="section-sub">Tudo que você precisa para gerenciar o macOS, em uma interface elegante e intuitiva.</p>
+
+    <div class="features-grid">
+
+      <div class="feature-card fade-in">
+        <span class="feature-icon">⬇️</span>
+        <div class="feature-title">macOS Downloader PRO</div>
+        <p class="feature-desc">Baixe versões do macOS em formato PKG via terminal integrado. Suporte a múltiplos catálogos, seleção de versão e confirmação interativa. Exibe info do sistema e espaço em disco em tempo real.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <span class="feature-icon">🔄</span>
+        <div class="feature-title">System Updater</div>
+        <p class="feature-desc">Atualize o macOS via startosinstall ou erase-install. Detecta automaticamente instaladores em /Applications. Exibe status do SIP, Authenticated Root e build atual do sistema.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <span class="feature-icon">💾</span>
+        <div class="feature-title">Media Creator</div>
+        <p class="feature-desc">Crie instaladores bootáveis do macOS em USB ou partição externa HFS+. Detecta automaticamente instaladores e volumes disponíveis. Usa createinstallmedia. Volume mínimo: 14 GB.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <span class="feature-icon">🔌</span>
+        <div class="feature-title">Montar EFI — Little MountEFI</div>
+        <p class="feature-desc">Gerenciador completo de partições EFI. Lista todos os discos internos e externos, identifica EFI Boot e Bootloader, e permite montar qualquer partição com um único clique.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <span class="feature-icon">ℹ️</span>
+        <div class="feature-title">System Info</div>
+        <p class="feature-desc">Informações completas do hardware: processador, RAM, GPU, SMBios, versão do macOS, build, bootloader ativo e espaço em disco. Atualização em tempo real com um clique.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <span class="feature-icon">🎨</span>
+        <div class="feature-title">Configurações & Temas</div>
+        <p class="feature-desc">Personalize a interface com 3 temas: Light ☀️, Dark 🌑 e Matrix Hacker 🟢. Opção de seguir o tema do sistema automaticamente. Fonte e fundo do terminal personalizáveis.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== SCREENSHOTS ===== -->
+<section id="screenshots">
+  <div class="container">
+    <p class="section-label">Screenshots</p>
+    <h2 class="section-title">Veja o App em Ação</h2>
+    <p class="section-sub">Interface moderna com 3 temas disponíveis. Clique em qualquer imagem para ampliar.</p>
+
+    <div class="screenshots-grid">
+
+      <div class="screenshot-item fade-in" onclick="openLightbox('https://www.genspark.ai/api/files/s/wAlJQ4EZ')">
+        <div class="window-titlebar">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+          <span class="window-title">macOS Updater Suite</span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/wAlJQ4EZ" alt="macOS Downloader PRO" loading="lazy" />
+        <div class="screenshot-label">
+          macOS Downloader PRO
+          <span class="theme-tag tag-dark">Dark</span>
+        </div>
+      </div>
+
+      <div class="screenshot-item fade-in" onclick="openLightbox('https://www.genspark.ai/api/files/s/fY1mXlDt')">
+        <div class="window-titlebar">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+          <span class="window-title">macOS Updater Suite</span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/fY1mXlDt" alt="Media Creator" loading="lazy" />
+        <div class="screenshot-label">
+          Media Creator
+          <span class="theme-tag tag-matrix">Matrix</span>
+        </div>
+      </div>
+
+      <div class="screenshot-item fade-in" onclick="openLightbox('https://www.genspark.ai/api/files/s/5YmpM2SF')">
+        <div class="window-titlebar">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+          <span class="window-title">macOS Updater Suite</span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/5YmpM2SF" alt="System Updater Light" loading="lazy" />
+        <div class="screenshot-label">
+          System Updater
+          <span class="theme-tag tag-light">Light</span>
+        </div>
+      </div>
+
+      <div class="screenshot-item fade-in" onclick="openLightbox('https://www.genspark.ai/api/files/s/oazypr45')">
+        <div class="window-titlebar">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+          <span class="window-title">macOS Updater Suite</span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/oazypr45" alt="Montar EFI" loading="lazy" />
+        <div class="screenshot-label">
+          Montar EFI — Little MountEFI
+          <span class="theme-tag tag-dark">Dark</span>
+        </div>
+      </div>
+
+      <div class="screenshot-item fade-in" onclick="openLightbox('https://www.genspark.ai/api/files/s/C8UF5SZH')">
+        <div class="window-titlebar">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+          <span class="window-title">macOS Updater Suite</span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/C8UF5SZH" alt="System Info Matrix" loading="lazy" />
+        <div class="screenshot-label">
+          System Info
+          <span class="theme-tag tag-matrix">Matrix</span>
+        </div>
+      </div>
+
+      <div class="screenshot-item fade-in" onclick="openLightbox('https://www.genspark.ai/api/files/s/4r4fCfbV')">
+        <div class="window-titlebar">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+          <span class="window-title">macOS Updater Suite</span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/4r4fCfbV" alt="System Info Dark" loading="lazy" />
+        <div class="screenshot-label">
+          System Info
+          <span class="theme-tag tag-dark">Dark</span>
+        </div>
+      </div>
+
+      <div class="screenshot-item fade-in" onclick="openLightbox('https://www.genspark.ai/api/files/s/6wiL4TJn')">
+        <div class="window-titlebar">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+          <span class="window-title">macOS Updater Suite</span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/6wiL4TJn" alt="Configurações Dark" loading="lazy" />
+        <div class="screenshot-label">
+          Configurações de Aparência
+          <span class="theme-tag tag-dark">Dark</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== LIGHTBOX ===== -->
+<div id="lightbox" onclick="closeLightbox()">
+  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="Screenshot ampliado" />
+</div>
+
+<!-- ===== TEMAS ===== -->
+<section id="temas">
+  <div class="container">
+    <p class="section-label">Personalização</p>
+    <h2 class="section-title">3 Temas para Todos os Gostos</h2>
+    <p class="section-sub">Escolha o tema que combina com você — ou deixe o app seguir o tema do sistema automaticamente.</p>
+
+    <div class="temas-grid">
+
+      <div class="tema-card fade-in">
+        <div class="window-titlebar" style="background:#1a1a1a;">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/C8UF5SZH" alt="Tema Matrix" loading="lazy" />
+        <div class="tema-info">
+          <div class="tema-name" style="color: var(--green);">🟢 Matrix Hacker</div>
+          <div class="tema-desc">Modo hacker com chuva de código verde neon. Para quem prefere se sentir no terminal — com estilo.</div>
+        </div>
+      </div>
+
+      <div class="tema-card fade-in">
+        <div class="window-titlebar" style="background:#1a1a1a;">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/4r4fCfbV" alt="Tema Dark" loading="lazy" />
+        <div class="tema-info">
+          <div class="tema-name" style="color: var(--blue);">🌑 Dark Mode</div>
+          <div class="tema-desc">Interface escura e elegante. Reduz o cansaço visual e combina com o ambiente de trabalho profissional.</div>
+        </div>
+      </div>
+
+      <div class="tema-card fade-in">
+        <div class="window-titlebar">
+          <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/5YmpM2SF" alt="Tema Light" loading="lazy" />
+        <div class="tema-info">
+          <div class="tema-name" style="color: #f0e68c;">☀️ Light Mode</div>
+          <div class="tema-desc">Interface clara e limpa, perfeita para ambientes bem iluminados. Confortável para uso diurno.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== ACTIVATION ===== -->
+<section id="activation">
+  <div class="container">
+    <p class="section-label">Licença</p>
+    <h2 class="section-title">Como Funciona a Ativação</h2>
+    <p class="section-sub">Processo simples em 4 etapas. Você recebe o serial por email e ativa direto no app.</p>
+
+    <div class="activation-grid">
+      <div class="steps">
+
+        <div class="step fade-in">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>💳 Faça o Pagamento via PayPal</h4>
+            <p>Escolha pagar em USD $20 (internacional) ou R$100 (Brasil). Pagamento seguro via PayPal.</p>
+          </div>
+        </div>
+
+        <div class="step fade-in">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>📧 Informe seu Email no App</h4>
+            <p>Abra o macOS Updater Suite, vá para a tela de ativação e informe o email usado no pagamento.</p>
+          </div>
+        </div>
+
+        <div class="step fade-in">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>🔑 Receba o Serial por Email</h4>
+            <p>Clique em "Solicitar Serial por Email". Você receberá um código no formato XXXX–XXXX–XXXX–XXXX em até 24h.</p>
+          </div>
+        </div>
+
+        <div class="step fade-in">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>✅ Cole o Serial e Ative</h4>
+            <p>Cole o serial recebido no campo indicado e clique em "Ativar Aplicativo". Pronto — acesso vitalício!</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="activation-window fade-in">
+        <div class="window-titlebar" style="background: #f0f0f0; border-bottom: 1px solid #ddd;">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+        </div>
+        <img src="https://www.genspark.ai/api/files/s/TKqhsUF8" alt="Tela de Ativação do macOS Updater Suite" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing">
+  <div class="container">
+    <p class="section-label" style="text-align:center;">Preço</p>
+    <h2 class="section-title" style="text-align:center;">Um Preço Justo, Acesso Vitalício</h2>
+    <p class="section-sub" style="text-align:center; margin-left:auto; margin-right:auto; margin-bottom:48px;">
+      Pague uma vez e use para sempre. Sem assinaturas, sem surpresas.
+    </p>
+
+    <div class="pricing-wrapper">
+      <div class="pricing-card">
+        <span class="pricing-badge">✨ Licença Vitalícia</span>
+        <div class="pricing-title">macOS Updater Suite</div>
+
+        <div class="price-main">
+          <span class="price-currency">$</span>20
+        </div>
+        <div class="price-sub">USD — pagamento único</div>
+        <div class="price-brl">🇧🇷 Pagamento em BRL: <strong>R$100,00</strong></div>
+
+        <ul class="features-list">
+          <li><i class="fa-solid fa-check-circle"></i> 6 ferramentas em 1 aplicativo</li>
+          <li><i class="fa-solid fa-check-circle"></i> Licença vitalícia — pague uma vez</li>
+          <li><i class="fa-solid fa-check-circle"></i> Suporte via email incluído</li>
+          <li><i class="fa-solid fa-check-circle"></i> Atualizações futuras incluídas</li>
+          <li><i class="fa-solid fa-check-circle"></i> Interface em Português (BR) e English</li>
+          <li><i class="fa-solid fa-check-circle"></i> 3 temas: Matrix 🟢, Dark 🌑, Light ☀️</li>
+          <li><i class="fa-solid fa-check-circle"></i> Compatível: macOS Ventura 13+ / Tahoe 26+</li>
+          <li><i class="fa-solid fa-check-circle"></i> Ativação por serial exclusivo</li>
+        </ul>
+
+        <div class="pricing-buttons">
+          <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=picelli1974%40outlook.com&amount=20&currency_code=USD&item_name=macOS+Updater+Suite+License"
+             target="_blank" class="btn-paypal-usd">
+            <i class="fa-brands fa-paypal"></i> Pagar USD $20 — PayPal
+          </a>
+          <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=picelli1974%40outlook.com&amount=100&currency_code=BRL&item_name=macOS+Updater+Suite+Licenca"
+             target="_blank" class="btn-paypal-brl">
+            <i class="fa-brands fa-paypal"></i> Pagar R$100 — PayPal (BRL)
+          </a>
+        </div>
+
+        <div class="pricing-note">
+          <i class="fa-solid fa-circle-info"></i>
+          Após o pagamento, abra o app, informe seu email e solicite o serial de ativação.<br />
+          Dúvidas? <a href="/cdn-cgi/l/email-protection#9cecf5fff9f0f0f5ada5aba8dcf5fff0f3e9f8b2fff3f1" style="color: var(--blue);"><span class="__cf_email__" data-cfemail="1b6b72787e7777722a222c2f5b727877746e7f35787476">[email&#160;protected]</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section id="faq">
+  <div class="container">
+    <p class="section-label">FAQ</p>
+    <h2 class="section-title">Perguntas Frequentes</h2>
+    <p class="section-sub">Tem alguma dúvida? Veja as respostas abaixo ou entre em contato.</p>
+
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          Como recebo minha licença após o pagamento?
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>Após o pagamento via PayPal, abra o aplicativo, vá para a tela de ativação, informe o email utilizado no pagamento e clique em <strong>"Solicitar Serial por Email"</strong>. Você receberá o serial de ativação em até 24 horas.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          A licença é realmente vitalícia? Tem mensalidade?
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>Sim! Uma única compra garante acesso <strong>permanente</strong> ao app e a todas as suas atualizações futuras. Sem assinatura, sem mensalidade, sem surpresas.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          Quais versões do macOS são compatíveis?
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>O app é compatível com <strong>macOS Ventura 13.x</strong> e <strong>macOS Tahoe 26.x</strong>. Testado em configurações Hackintosh e Macs nativos.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          Posso usar a licença em mais de um Mac?
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>Cada licença é válida para <strong>1 usuário</strong>. Para múltiplos Macs ou uso empresarial, entre em contato pelo email <a href="/cdn-cgi/l/email-protection#75051c161019191c444c4241351c16191a00115b161a18" style="color: var(--blue);"><span class="__cf_email__" data-cfemail="0b7b62686e6767623a323c3f4b626867647e6f25686466">[email&#160;protected]</span></a> para uma proposta personalizada.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          O app funciona em Hackintosh?
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>Sim! O macOS Updater Suite foi desenvolvido e testado em configurações Hackintosh com Clover e OpenCore. O módulo System Info exibe o Bootloader e SMBios do sistema corretamente.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-inner">
+
+    <div class="footer-brand">
+      <h3><i class="fa-brands fa-apple"></i> macOS <span>Updater</span> Suite</h3>
+      <p>Suite completa para baixar, atualizar e instalar o macOS. Desenvolvida com ❤️ para a comunidade macOS — por Christian Max Picelli.</p>
+    </div>
+
+    <div class="footer-links">
+      <h4>Navegação</h4>
+      <ul>
+        <li><a href="#features">Recursos</a></li>
+        <li><a href="#screenshots">Screenshots</a></li>
+        <li><a href="#temas">Temas</a></li>
+        <li><a href="#pricing">Preço</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Contato &amp; Links</h4>
+      <a href="/cdn-cgi/l/email-protection#77071e14121b1b1e464e4043371e141b1802135914181a">
+        <i class="fa-solid fa-envelope"></i> <span class="__cf_email__" data-cfemail="9feff6fcfaf3f3f6aea6a8abdff6fcf3f0eafbb1fcf0f2">[email&#160;protected]</span>
+      </a>
+      <a href="https://github.com/maxpicelli/macOS-updater-suite" target="_blank">
+        <i class="fa-brands fa-github"></i> GitHub — maxpicelli
+      </a>
+      <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=picelli1974%40outlook.com&amount=20&currency_code=USD&item_name=macOS+Updater+Suite+License" target="_blank">
+        <i class="fa-brands fa-paypal"></i> Comprar Licença
+      </a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2025 macOS Updater Suite — by <a href="https://github.com/maxpicelli" target="_blank">Christian Max Picelli</a></p>
+    <p>Desenvolvido com ❤️ para a comunidade macOS</p>
+  </div>
+</footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ---- Navbar scroll ----
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 20) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+  });
+
+  // ---- Hamburger menu ----
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+  function closeMobile() { mobileMenu.classList.remove('open'); }
+
+  // ---- Matrix Rain Canvas ----
+  (function() {
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = document.getElementById('hero').offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ'.split('');
+    const fontSize = 14;
+    let cols, drops;
+
+    function init() {
+      cols = Math.floor(canvas.width / fontSize);
+      drops = Array(cols).fill(1);
+    }
+    init();
+    window.addEventListener('resize', init);
+
+    function draw() {
+      ctx.fillStyle = 'rgba(13,17,23,0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00ff41';
+      ctx.font = fontSize + 'px monospace';
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+    setInterval(draw, 50);
+  })();
+
+  // ---- Animated counters ----
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    let current = 0;
+    const step = target / 40;
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) { current = target; clearInterval(timer); }
+      el.textContent = Math.floor(current);
+    }, 30);
+  }
+
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('.stat-number').forEach(animateCounter);
+        statsObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.5 });
+  statsObserver.observe(document.getElementById('stats'));
+
+  // ---- Fade in on scroll ----
+  const fadeItems = document.querySelectorAll('.fade-in');
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        fadeObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  fadeItems.forEach(el => fadeObserver.observe(el));
+
+  // ---- Lightbox ----
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // ---- FAQ Accordion ----
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+</script>
+
+</body>
+</html>
