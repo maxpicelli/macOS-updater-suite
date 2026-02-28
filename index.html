@@ -102,6 +102,37 @@
 
     .btn-nav:hover { background: #4090e0 !important; transform: scale(1.04); }
 
+    .lang-switch {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 12px;
+    }
+
+    .lang-btn {
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .lang-btn:hover {
+      color: var(--text);
+      border-color: var(--blue);
+    }
+
+    .lang-btn.active {
+      background: rgba(88,166,255,0.14);
+      color: #cfe6ff;
+      border-color: var(--blue);
+    }
+
     .hamburger {
       display: none;
       flex-direction: column;
@@ -813,6 +844,7 @@
 
     @media (max-width: 640px) {
       .nav-links { display: none; }
+      .lang-switch { display: none; }
       .hamburger { display: flex; }
       .features-grid { grid-template-columns: 1fr; }
       .screenshots-grid { grid-template-columns: 1fr; }
@@ -845,6 +877,11 @@
     </li>
   </ul>
 
+  <div class="lang-switch" aria-label="Language switch">
+    <a href="#" class="lang-btn active" id="lang-pt">PT</a>
+    <a href="#" class="lang-btn" id="lang-en" target="_blank" rel="noopener noreferrer">EN</a>
+  </div>
+
   <div class="hamburger" id="hamburger">
     <span></span><span></span><span></span>
   </div>
@@ -857,6 +894,7 @@
   <a href="#temas" onclick="closeMobile()">Temas</a>
   <a href="#pricing" onclick="closeMobile()">Preço</a>
   <a href="#faq" onclick="closeMobile()">FAQ</a>
+  <a href="#" id="lang-en-mobile" target="_blank" rel="noopener noreferrer">🇺🇸 Translate to English</a>
   <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=picelli1974%40outlook.com&amount=20&currency_code=USD&item_name=macOS+Updater+Suite+License" target="_blank">🛒 Buy — USD $20</a>
 </div>
 
@@ -1354,6 +1392,20 @@
     mobileMenu.classList.toggle('open');
   });
   function closeMobile() { mobileMenu.classList.remove('open'); }
+
+  // ---- PT/EN translation links ----
+  (function() {
+    const ptBtn = document.getElementById('lang-pt');
+    const enBtn = document.getElementById('lang-en');
+    const enMobileBtn = document.getElementById('lang-en-mobile');
+
+    const baseUrl = window.location.origin + window.location.pathname;
+    const enTranslateUrl = 'https://translate.google.com/translate?sl=auto&tl=en&u=' + encodeURIComponent(baseUrl);
+
+    enBtn.href = enTranslateUrl;
+    enMobileBtn.href = enTranslateUrl;
+    ptBtn.href = baseUrl;
+  })();
 
   // ---- Matrix Rain Canvas ----
   (function() {
