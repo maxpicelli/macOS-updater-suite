@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title>macOS Updater Suite</title>
+  <desc>Rounded square icon with a clover-style updater mark.</desc>
+  <defs>
+    <linearGradient id="bg" x1="28" y1="20" x2="220" y2="236" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.58" stop-color="#123f7b"/>
+      <stop offset="1" stop-color="#0b1f16"/>
+    </linearGradient>
+    <linearGradient id="stroke" x1="48" y1="44" x2="200" y2="208" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7ec8ff"/>
+      <stop offset="1" stop-color="#49d17d"/>
+    </linearGradient>
+    <linearGradient id="core" x1="76" y1="76" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9fe7ff"/>
+      <stop offset="1" stop-color="#6df39a"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#03101d" flood-opacity="0.36"/>
+    </filter>
+  </defs>
+  <rect x="18" y="18" width="220" height="220" rx="56" fill="url(#bg)"/>
+  <rect x="20" y="20" width="216" height="216" rx="54" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="4"/>
+  <g filter="url(#shadow)">
+    <circle cx="128" cy="128" r="70" fill="none" stroke="url(#stroke)" stroke-width="18" stroke-linecap="round" stroke-dasharray="286 82" transform="rotate(-32 128 128)"/>
+    <path d="M184 95l4 34-29-17z" fill="#7ec8ff"/>
+    <g fill="url(#core)">
+      <circle cx="105" cy="104" r="24"/>
+      <circle cx="151" cy="104" r="24"/>
+      <circle cx="105" cy="150" r="24"/>
+      <circle cx="151" cy="150" r="24"/>
+    </g>
+    <circle cx="128" cy="127" r="14" fill="#eafcff" opacity="0.94"/>
+  </g>
+</svg>
