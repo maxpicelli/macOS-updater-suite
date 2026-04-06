@@ -44,4 +44,6 @@ If you test the app, feedback is welcome through GitHub Issues.
 
 Special thanks to the YouTube channel litemint09 for the excellent video demonstration of this project and for supporting the Hackintosh community.
 
+https://img.youtube.com/vi/Gs3WU4tf7Cs/hqdefault.jpg
+ 
 https://youtu.be/Gs3WU4tf7Cs 
